@@ -22,12 +22,14 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      - name: Build and push image
+      - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
-          tags: ${{ secrets.ACR_SERVER }}/my-churn-api:${{ github.sha }}
+          tags: |
+            ${{ secrets.ACR_SERVER }}/my-churn-api:${{ github.sha }}
+            ${{ secrets.ACR_SERVER }}/my-churn-api:latest
 
   deploy:
     runs-on: ubuntu-latest
@@ -38,4 +40,5 @@ jobs:
         uses: azure/webapps-deploy@v3
         with:
           app-name: my-churn-api-shraddha
-          images: ${{ secrets.ACR_SERVER }}/my-churn-api:${{ github.sha }}
+          images: ${{ secrets.ACR_SERVER }}/my-churn-api:latest
+          slot-name: 'Production'
