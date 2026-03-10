@@ -2,7 +2,7 @@ name: Build and deploy container app to Azure Web App
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ["master"]
   workflow_dispatch:
 
 jobs:
@@ -10,38 +10,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Log in to Azure Container Registry
-      uses: azure/docker-login@v1
-      with:
-        login-server: ${{ secrets.ACR_SERVER }}
-        username: ${{ secrets.ACR_USERNAME }}
-        password: ${{ secrets.ACR_PASSWORD }}
+      - name: Login to Azure Container Registry
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ secrets.ACR_SERVER }}
+          username: ${{ secrets.ACR_USERNAME }}
+          password: ${{ secrets.ACR_PASSWORD }}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v6
-      with:
-        context: .
-        push: true
-        tags: ${{ secrets.ACR_SERVER }}/my-churn-api:${{ github.sha }}
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.ACR_SERVER }}/my-churn-api:${{ github.sha }}
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
-    environment:
-      name: 'Production'
-      url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
 
     steps:
-    - name: Deploy to Azure Web App
-      id: deploy-to-webapp
-      uses: azure/webapps-deploy@v3
-      with:
-        app-name: 'my-churn-api-shraddha'                # ← change to your exact App name
-        slot-name: 'Production'
-        images: '${{ secrets.ACR_SERVER }}/my-churn-api:${{ github.sha }}'
-        startup-command: 'uvicorn main:app --host 0.0.0.0 --port 8000'
+      - name: Deploy container to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: my-churn-api-shraddha
+          images: ${{ secrets.ACR_SERVER }}/my-churn-api:${{ github.sha }}
