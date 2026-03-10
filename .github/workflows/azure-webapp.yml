@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      #  Checkout code
+      # 1️⃣ Checkout code
       - uses: actions/checkout@v4
 
-      #  Setup Docker buildx (multi-platform build support)
+      # 2️⃣ Setup Docker Buildx
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      #  Login to Azure Container Registry
+      # 3️⃣ Login to Azure Container Registry
       - name: Login to Azure Container Registry
         uses: azure/docker-login@v1
         with:
@@ -25,7 +25,7 @@ jobs:
           username: ${{ secrets.ACR_USERNAME }}
           password: ${{ secrets.ACR_PASSWORD }}
 
-      #  Build and push Docker image (SHA + latest)
+      # 4️⃣ Build and push Docker image (SHA + latest)
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
@@ -40,13 +40,13 @@ jobs:
     needs: build
 
     steps:
-      #  Login to Azure via Service Principal
+      # 1️⃣ Login to Azure via Service Principal
       - name: Login to Azure
         uses: azure/login@v1
         with:
           creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-      #  Deploy container to Web App (Managed Identity pulls image)
+      # 2️⃣ Deploy container to Azure Web App (Managed Identity pulls image)
       - name: Deploy container to Azure Web App
         uses: azure/webapps-deploy@v3
         with:
